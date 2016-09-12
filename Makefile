@@ -3,10 +3,10 @@ BINARY=a.out
 OPT_LEVEL=g
 
 all: main.o
-	g++ *.o -o $(BINARY) --std=gnu++11 -lm -lpthread -lX11
+	g++ *.o -o $(BINARY) -lm -lpthread -lX11
 
 %.o: %.cpp
-	g++ $< -c -O$(OPT_LEVEL)
+	g++ $< -c -O$(OPT_LEVEL) --std=gnu++11
 
 run: $(BINARY)
 	./$(BINARY)
