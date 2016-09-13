@@ -32,7 +32,7 @@ public:
 		x = CImg<float>(img.width(), img.height());
 		y = CImg<float>(img.width(), img.height());
 
-		// initialize float-value image coordinates
+		// initialize float-value image coordinates from 0 to 1
 		float currentWidth = 0.f, currentHeight = 0.f;
 		for(int r = 0; r < height(); ++r)
 		{
@@ -42,38 +42,68 @@ public:
 			{
 				currentWidth = static_cast<float>(c) / width();
 
-				*(x.begin() + r * width() + c) = currentWidth;
-				*(y.begin() + r * width() + c) = currentHeight;
+				xAt(r, c) = currentWidth;
+				yAt(r, c) = currentHeight;
 			}
 		}
 	}
 
 	~FlexibleImage() = default;
 
-	int width(void) { return img.width(); }
-	int height(void) { return img.height(); }
+	int width(void) const { return img.width(); }
+	int height(void) const { return img.height(); }
 
 	CImg<T>& data(void) { return img; }
 	CImg<float>& xData(void) { return x; }
 	CImg<float>& yData(void) { return y; }
 
-	// return desired coord of specified pixel
+	// return desired coord of specified pixel (mutable)
 	float& xAt(int pixRow, int pixCol)
 		{ return *(x.begin() + pixRow * width() + pixCol); }
 	float& yAt(int pixRow, int pixCol)
 		{ return *(y.begin() + pixRow * width() + pixCol); }
+
+	// alter coordinates so pixel coordinates follow these corner positions
+	// (a.k.a. perspective shift)
+	void moveCornersTo(float xTopLeft, float yTopLeft,
+		float xTopRight, float yTopRight,
+		float xBottomLeft, float yBottomLeft,
+		float xBottomRight, float yBottomRight)
+	{
+		// calculate initial and final slopes and constant offsets
+		float	yInitSlope = yTopRight - yTopLeft,
+				yFinalSlope = yBottomRight - yBottomLeft,
+				yInitIntercept = yTopLeft,
+				yFinalIntercept = yBottomLeft;
+
+		float	xInitSlope = xBottomLeft - xTopLeft,
+				xFinalSlope = xBottomRight - xTopRight,
+				xInitIntercept = xTopLeft,
+				xFinalIntercept = xTopRight;
+
+		// perform transformation
+		float x_base, y_base;
+		for(int r = 0; r < height(); ++r)
+		{
+			// base values calculated for each pixel
+			y_base = static_cast<float>(r) / height();
+
+			for(int c = 0; c < width(); ++c)
+			{
+				// base values calculated for each pixel
+				x_base = static_cast<float>(c) / width();
+
+				xAt(r, c) = ((xFinalSlope - xInitSlope) * x_base + xInitSlope) * y_base	+ (xFinalIntercept - xInitIntercept) * x_base + xInitIntercept;
+				yAt(r, c) = ((yFinalSlope - yInitSlope) * y_base + yInitSlope) * x_base + (yFinalIntercept - xInitIntercept) * y_base + yInitIntercept;
+			}
+		}
+	}
 };
-
-// // uses a 2x2 matrix to transform pixel coords
-// void linearTransform(CImgList<float> coords, float matrix[])
-// {
-
-// }
 
 int main(int argc, char* argv[])
 {
 	// create an image object from file
-	FlexibleImage<unsigned char> ubuntu("scene.jpg");
+	FlexibleImage<unsigned char> scene("scene.jpg");
 
 	// create a display
 	CImgDisplay disp(DISP_X, DISP_Y, "Image");
@@ -81,21 +111,18 @@ int main(int argc, char* argv[])
 	CImgDisplay yDisp(DISP_X, DISP_Y, "Y Coordinates", 2);
 
 	// set coordinate display scaling
-	xDisp = ubuntu.xData();
-	yDisp = ubuntu.yData();
+	xDisp = scene.xData();
+	yDisp = scene.yData();
 
-	for(int i = 0; i < ubuntu.height(); ++i)
-	{
-		for(int j = 0; j < ubuntu.width(); ++j)
-		{
-			ubuntu.xAt(i, j) *= static_cast<float>(i) / ubuntu.height();
-		}
-	}
+	scene.moveCornersTo(0.f, 0.f,
+		1.f, 0.f,
+		0.f, 0.f,
+		1.f, 1.f);
 
 	// show the image and its coordinate values
-	disp = ubuntu.data();
-	xDisp = ubuntu.xData();
-	yDisp = ubuntu.yData();
+	disp = scene.data();
+	xDisp = scene.xData();
+	yDisp = scene.yData();
 
 	while(!(disp.is_closed() || xDisp.is_closed() || yDisp.is_closed()));
 
