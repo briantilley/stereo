@@ -115,8 +115,8 @@ public:
 				// apply slope-intercept formula to find new coordinates
 				xAt(r, c) = ((xFinalSlope - xInitSlope) * x_base + xInitSlope) * y_base
 					+ (xFinalIntercept - xInitIntercept) * x_base + xInitIntercept;
-				yAt(r, c) = ((yFinalSlope - yInitSlope) * y_base
-					+ yInitSlope) * x_base + (yFinalIntercept - xInitIntercept) * y_base + yInitIntercept;
+				yAt(r, c) = ((yFinalSlope - yInitSlope) * y_base + yInitSlope) * x_base
+					+ (yFinalIntercept - yInitIntercept) * y_base + yInitIntercept;
 			}
 		}
 	}
@@ -153,8 +153,6 @@ public:
 					+= data().atX(c, r, 0, 2) / distance;
 				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 3)
 					+= 1 / distance;
-				
-				// return result;
 
 				// accumulate into upper right neighboring pixel
 				distance = pointDistance(floor(denormX + .5), floor(denormY), xAt(r, c), yAt(r, c));
@@ -225,12 +223,6 @@ int main(int argc, char* argv[])
 	// create a display
 	CImgDisplay before(DISP_X, DISP_Y, "Before");
 	CImgDisplay after(DISP_X, DISP_Y, "After");
-	CImgDisplay xDisp(DISP_X, DISP_Y, "X Coordinates", 2);
-	CImgDisplay yDisp(DISP_X, DISP_Y, "Y Coordinates", 2);
-
-	// set coordinate display scaling
-	xDisp = scene.xData();
-	yDisp = scene.yData();
 
 	scene.moveCornersTo(.1f, .2f,
 		.7f, .3f,
@@ -240,21 +232,12 @@ int main(int argc, char* argv[])
 	// show the image and its coordinate values
 	before = scene.data();
 	after = scene.rasterize();
-	xDisp = scene.xData();
-	yDisp = scene.yData();
 
-	while(!(before.is_closed() || after.is_closed() || xDisp.is_closed() || yDisp.is_closed()));
+	while(!(before.is_closed() && after.is_closed()));
 
 	return 0;
 }
 
-// linear transforms
-/*
-give ea. pixel float coords [0.0, 1.0)
-mul. coords by transformation matrix
-linearly interpolate mem. pixel positions from float coords?
-*/
-
 // rectify image:
 //		apply anti-distortion map
-//		apply perspective transform
+//		apply perspective transform (implemented)
