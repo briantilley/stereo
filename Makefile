@@ -11,5 +11,9 @@ all: main.o
 run: $(BINARY)
 	./$(BINARY)
 
+stage: clean
+	git add -A
+	git status
+
 clean:
 	rm -rf *.o $(BINARY)

@@ -6,8 +6,8 @@
 #define cimg_use_jpeg
 
 // window dimensions
-#define DISP_X 1280
-#define DISP_Y 800
+#define DISP_X 1920
+#define DISP_Y 1200
 
 using namespace std;
 using namespace cimg_library;
@@ -121,7 +121,7 @@ public:
 		}
 	}
 
-	// create a new raster image with transformations applied
+		// create a new raster image with transformations applied
 	// coordinate value of -1.f indicates pixel is blank, not dark
 	CImg<unsigned char> rasterize(void)
 	{
@@ -139,56 +139,36 @@ public:
 		{
 			for(int c = 0; c < width(); ++c)
 			{
-				double denormX = xAt(r, c) * width();
+				double distance = 0.0;
+				double denormX = xAt(r, c) * width() + .5; // initial run subtracts .5
 				double denormY = yAt(r, c) * height();
 
-				// accumulate into upper left neighboring pixel
-				double distance = pointDistance(floor(denormX), floor(denormY), xAt(r, c), yAt(r, c));
+				for(int pixel = 0; pixel < 4; ++pixel)
+				{
+					// adding and subtracting .5 selects
+					// left, right, up, down pixels
+					if(pixel % 2)
+						denormX += .5;
+					else
+						denormX -= .5;
 
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 0)
-					+= data().atX(c, r, 0, 0) / distance;
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 1)
-					+= data().atX(c, r, 0, 1) / distance;
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 2)
-					+= data().atX(c, r, 0, 2) / distance;
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 3)
-					+= 1 / distance;
+					if(pixel == 2)
+						denormY += .5;
+					
+					// distance from shifted point to grid-aligned point
+					distance = pointDistance(floor(denormX), floor(denormY), xAt(r, c), yAt(r, c));
 
-				// accumulate into upper right neighboring pixel
-				distance = pointDistance(floor(denormX + .5), floor(denormY), xAt(r, c), yAt(r, c));
-				
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 0)
-					+= data().atX(c, r, 0, 0) / distance;
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 1)
-					+= data().atX(c, r, 0, 1) / distance;
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 2)
-					+= data().atX(c, r, 0, 2) / distance;
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 3)
-					+= 1 / distance;
+					// actual accumulation happens
+					for(int color = 0; color < 3; ++color)
+					{
+						accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, color)
+							+= data().atX(c, r, 0, color) / distance;
+					}
 
-				// accumulate into lower left neighboring pixel
-				distance = pointDistance(floor(denormX), floor(denormY + .5), xAt(r, c), yAt(r, c));
-				
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 0)
-					+= data().atX(c, r, 0, 0) / distance;
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 1)
-					+= data().atX(c, r, 0, 1) / distance;
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 2)
-					+= data().atX(c, r, 0, 2) / distance;
-				accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 3)
+					// keep track of total weight put into pixel
+					accumulation.atX(clamp(denormX, 0, width() - 1), clamp(denormY, 0, height() - 1), 0, 3)
 					+= 1 / distance;
-
-				// accumulate into lower left neighboring pixel
-				distance = pointDistance(floor(denormX + .5), floor(denormY + .5), xAt(r, c), yAt(r, c));
-				
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 0)
-					+= data().atX(c, r, 0, 0) / distance;
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 1)
-					+= data().atX(c, r, 0, 1) / distance;
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 2)
-					+= data().atX(c, r, 0, 2) / distance;
-				accumulation.atX(clamp(denormX + .5, 0, width() - 1), clamp(denormY + .5, 0, height() - 1), 0, 3)
-					+= 1 / distance;
+				}
 			}
 		}
 
