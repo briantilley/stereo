@@ -1,0 +1,39 @@
+Below is a lazy UML definition of the KDTree class. This definition is not
+intended to strictly follow the UML standard.
+
+-------------------------------------------------------------------------------
+KDNode
+-------------------------------------------------------------------------------
++ vectorIndex: Int
++ dimension: Int
++ left: KDNode*
++ right: KDNode*
+-------------------------------------------------------------------------------
+
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+-------------------------------------------------------------------------------
+KDTree
+-------------------------------------------------------------------------------
+- root: KDNode*
+-------------------------------------------------------------------------------
++ KDTree(ValueVector[] data)
++ nearestNeighbor(ValueVector): Int neighborIndex
+-------------------------------------------------------------------------------
+
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+Comments:
+
+* 2DSurface is structured dataset, similar to an image, where data points
+  (n-dimensional vectors) form rows, and their n values form columns.
+  For simplicity, all n dimensions will have values of the same datatype.
+
+* Each data point is considered to be a ValueVector object (in C++, a fixed-
+  size array).
+
+* A KDTree will be built upon creation to index the given data, but will store.
+  neither the values of nor a reference to the data supplied. The KDTree cannot
+  be updated and will assume the data does not change for the life of the
+  KDTree instance. To obtain a KDTree for an altered dataset, one must
+  instantiate a new KDTree.
