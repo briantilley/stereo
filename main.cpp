@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include "CImg.h"
-#include "FlexibleImage.h"
 
 // use libjpeg rather than ImageMagick
 #define cimg_use_jpeg
@@ -12,6 +11,9 @@
 
 using namespace std;
 using namespace cimg_library;
+
+#include "FlexibleImage.h"
+#include "Image.h"
 
 int main(int argc, char* argv[])
 {
