@@ -1,0 +1,35 @@
+Coordinate (struct)
+__________________
+  x: float
+  y: float
+
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+Pixel (struct)
+__________________
+  value: float
+  pos: Coordinate
+
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+
+Image
+__________________
+- values: float*
+- width: const unsigned
+- height: const unsigned
+- coords: float*
+__________________
++ Image()
++ Image(width: unsigned, height: unsigned)
++ Image(width: unsigned, height: unsigned, data: float*)
++ Image(width: unsigned, height: unsigned, data: float*, coords: float*)
++ Image(Image)
++ at(column: unsigned, row: unsigned): Pixel
++ resample(width: unsigned, height: unsigned): Image
++ shiftCorners(upRight:Coordinate, upLeft:Coordinate, downRight:Coordinate, downLeft:Coordinate)
++ spatialScale()
++ spatialNormalize() # move furthest corner from center to edge, scale others by equal factor
++ rasterize(): Image # render transformed image into one with default coordinates
+__________________
+
+* heap size of an image is immutable (resample -> new instance)
