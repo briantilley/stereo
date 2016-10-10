@@ -8,8 +8,10 @@ inline unsigned Image::linearIndex(unsigned column, unsigned row) const {
 	return row * width() + column;
 }
 
+// null image
 Image::Image(): m_values(nullptr), m_width(0), m_height(0), m_coords(nullptr) { }
 
+// blank or copy of image supplied
 Image::Image(unsigned width, unsigned height, const float* values, const float* coords): m_width(width), m_height(height) {
 	// allocate space even for blank images
 	m_values = new float[width * height];
@@ -51,14 +53,17 @@ Image::Image(unsigned width, unsigned height, const float* values, const float* 
 	}
 }
 
+// deep copy
 Image::Image(const Image& arg): Image(arg.width(), arg.height(), arg.m_values, arg.m_coords) { }
 
+// destructor
 Image::~Image() {
 	// free heap memory
 	delete m_values;
 	delete m_coords;
 }
 
+// all data for a certain pixel
 Pixel Image::at(unsigned col, unsigned row) const {
 	return
 	{
@@ -67,6 +72,7 @@ Pixel Image::at(unsigned col, unsigned row) const {
 	};
 }
 
+// change image dimensions
 Image Image::resample(unsigned width, unsigned height) const {
 	Image result(width, height);
 
@@ -74,18 +80,22 @@ Image Image::resample(unsigned width, unsigned height) const {
 	return result;
 }
 
+// move corners (modifies instance)
 void Image::shiftCorners(Coordinate upRight, Coordinate upLeft, Coordinate downRight, Coordinate downLeft) {
 
 }
 
+// scale image (modifies instance)
 void Image::spatialScale() {
 
 }
 
+// scale to fill coordinate space (modifies instance)
 void Image::spatialNormalize() {
 
 }
 
+// turn transformed-coord image to default-coord image
 Image Image::rasterize() const {
 	Image result(width(), height());
 
